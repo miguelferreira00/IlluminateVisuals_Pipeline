@@ -1,55 +1,51 @@
 package pt.agencia.crm.config;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import pt.agencia.crm.config.oauth2.CustomOAuth2UserService;
-import pt.agencia.crm.config.oauth2.OAuth2LoginSuccessHandler;
 
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomOAuth2UserService customOAuth2UserService;
-    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
-
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/oauth2/**", "/error", "/api/auth/**").permitAll()
-                .requestMatchers("/api/export/**").hasAnyRole("PARTNER", "ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/**").hasAnyRole("PARTNER", "ADMIN")
+                // Login e logout são públicos
+                .requestMatchers("/api/auth/**").permitAll()
+                // Export e DELETE só para ADMIN
+                .requestMatchers("/api/export/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")
+                // Tudo o resto exige autenticação
                 .requestMatchers("/api/**").authenticated()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             )
-            .oauth2Login(oauth2 -> oauth2
-                .userInfoEndpoint(ui -> ui.userService(customOAuth2UserService))
-                .successHandler(oAuth2LoginSuccessHandler)
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
             )
-            .logout(logout -> logout
-                .logoutUrl("/api/auth/logout")
-                .logoutSuccessUrl("http://localhost:4200/login")
-                .deleteCookies("JSESSIONID")
+            // Desativa o redirect para /login do Spring Security (usamos o Angular para isso)
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) ->
+                    response.sendError(401, "Não autenticado"))
             );
 
         return http.build();
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of("http://localhost:4200"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));

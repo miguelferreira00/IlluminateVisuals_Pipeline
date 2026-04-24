@@ -1,0 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+// ── Design tokens ──────────────────────────────────────────────────────────
+:root {
+  --accent:        #E8D400;
+  --accent-hover:  #D4C200;
+  --accent-dark:   #C8B800;
+  --bg:            #F5F5F2;
+  --surface:       #FFFFFF;
+  --border:        #E2E2DC;
+  --text-primary:  #1A1A18;
+  --text-muted:    #6B6960;
+  --text-faint:    #9CA3AF;
+}
+
+// ── Reset ──────────────────────────────────────────────────────────────────
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, app-root { height: 100%; }
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  overflow: hidden;
+}
+
+// ── Scrollbar ──────────────────────────────────────────────────────────────
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D0D0CA; border-radius: 3px; }
+
+// ── Form elements ──────────────────────────────────────────────────────────
+input[type="text"], input[type="email"], input[type="tel"],
+input[type="date"], input[type="datetime-local"], input[type="number"],
+input[type="password"], textarea, select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Space Grotesk', sans-serif;
+  background: #fff;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.12s;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(232, 212, 0, 0.1);
+}
+textarea { resize: vertical; min-height: 80px; }
+label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.fg { display: flex; flex-direction: column; margin-bottom: 14px; }
+.fr { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+// ── Buttons ────────────────────────────────────────────────────────────────
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Space Grotesk', sans-serif;
+  border: none;
+  cursor: pointer;
+  line-height: 1;
+  transition: all 0.1s;
+  white-space: nowrap;
+
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+.btn-primary {
+  background: var(--accent);
+  color: var(--text-primary);
+  &:hover:not(:disabled) { background: var(--accent-hover); }
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1.5px solid var(--border);
+  &:hover:not(:disabled) { background: #F0F0EC; }
+}
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+
+// ── Animations ─────────────────────────────────────────────────────────────
+@keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes fadeInUp     { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn       { from { opacity: 0; } to { opacity: 1; } }
+@keyframes spin         { to { transform: rotate(360deg); } }
+
+.anim-slide   { animation: slideInRight 0.24s cubic-bezier(0.16,1,0.3,1); }
+.anim-fade    { animation: fadeInUp 0.18s ease; }
+.anim-overlay { animation: fadeIn 0.15s ease; }

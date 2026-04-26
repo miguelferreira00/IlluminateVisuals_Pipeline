@@ -117,7 +117,7 @@ function scoreColor(s: number) { return s >= 8 ? '#059669' : s >= 5 ? '#D97706' 
             @for (c of calls(); track c.id) {
               <div style="border:1px solid #E2E2DC;border-radius:10px;padding:12px 14px;background:#FAFAF8;margin-bottom:10px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-                  <span style="font-size:12px;color:#6B6960;">{{ fdt(c.dataCall) }} · <strong style="color:#1A1A18;">{{ c.callerUser?.nome }}</strong></span>
+                  <span style="font-size:12px;color:#6B6960;">{{ fdt(c.dataCall) }} · <strong style="color:#1A1A18;">{{ c.callerUser.nome }}</strong></span>
                   <span [style.background]="resultadoColor(c.resultado).bg" [style.color]="resultadoColor(c.resultado).t"
                         style="padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;">{{ resultadoLabel(c.resultado) }}</span>
                 </div>

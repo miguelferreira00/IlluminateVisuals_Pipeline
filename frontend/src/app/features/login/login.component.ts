@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
@@ -92,7 +92,7 @@ import { UserRole } from '../../core/models/models';
     .spinner { width:14px;height:14px;border:2px solid #1A1A18;border-top-color:transparent;border-radius:50%;display:inline-block;animation:spin 0.6s linear infinite; }
   `]
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   role    = signal<'CALLER' | 'ADMIN'>('CALLER');
   loading = signal(false);
   error   = signal('');
@@ -104,6 +104,14 @@ export class LoginComponent {
   ];
 
   constructor(private auth: AuthService, private router: Router) {}
+
+  ngOnInit(): void {
+    // Se já existe sessão válida, vai direto para o pipeline
+    this.auth.me().subscribe({
+      next: () => this.router.navigate(['/pipeline']),
+      error: () => {} // sem sessão, fica na página de login
+    });
+  }
 
   selectRole(r: 'CALLER' | 'ADMIN'): void {
     this.role.set(r);

@@ -50,7 +50,7 @@ import { BookMeetingModalComponent, BookingSlot } from './book-meeting-modal/boo
                   @for (r of meetingsForDay(day); track r.id) {
                     <div style="padding:7px 10px;border-radius:7px;background:#F3E8FF;border:1px solid #DDD6FE;font-size:12px;color:#7E22CE;font-weight:600;">
                       <div>{{ timeOf(r.dataReuniao) }} · {{ r.responsavel?.nome ?? '—' }}</div>
-                      <div style="font-size:11px;font-weight:500;opacity:.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.contacto?.empresa }}</div>
+                      <div style="font-size:11px;font-weight:500;opacity:.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.contacto.empresa }}</div>
                     </div>
                   }
                   @for (slot of freeSlots(day); track slot.inicio) {

@@ -1,5 +1,6 @@
 import { Component, input, output, computed } from '@angular/core';
 import { CurrentUser, ContactoResumo } from '../../../core/models/models';
+import { buildApiUrl } from '../../../core/config/api.config';
 
 type NavView = 'pipeline' | 'agenda' | 'dashboard';
 
@@ -87,5 +88,5 @@ export class SidebarComponent {
   readonly followUpCount = computed(() => this.contacts().filter(c => c.estado === 'FOLLOW_UP').length);
   readonly initial       = computed(() => this.user()?.nome?.[0]?.toUpperCase() ?? '?');
 
-  exportExcel(): void { window.open('/api/export/excel', '_blank'); }
+  exportExcel(): void { window.open(buildApiUrl('/api/export/excel'), '_blank'); }
 }

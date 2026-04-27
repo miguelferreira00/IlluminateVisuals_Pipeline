@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, finalize, tap, timeout } from 'rxjs';
 import { CurrentUser, UserRole } from '../models/models';
 
-export interface LoginRequest { role: UserRole; password?: string; }
+export interface LoginRequest { role: UserRole; username?: string; password?: string; }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {

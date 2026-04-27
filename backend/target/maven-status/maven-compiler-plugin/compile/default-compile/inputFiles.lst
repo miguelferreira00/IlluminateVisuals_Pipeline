@@ -1,5 +1,6 @@
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/CrmApplication.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/config/AppProperties.java
+/Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/config/DataInitializer.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/config/GoogleCalendarConfig.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/config/SecurityConfig.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/config/oauth2/CustomOAuth2UserService.java

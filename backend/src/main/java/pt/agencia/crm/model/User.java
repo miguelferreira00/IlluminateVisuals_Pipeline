@@ -29,6 +29,12 @@ public class User {
     @Column(nullable = false, length = 10)
     private UserRole role;
 
+    @Column(unique = true, length = 50)
+    private String username;
+
+    @Column(name = "password_hash", length = 255)
+    private String passwordHash;
+
     @Column(name = "google_calendar_token", columnDefinition = "TEXT")
     private String googleCalendarToken;
 

@@ -16,7 +16,7 @@ export const routes: Routes = [
       { path: 'pipeline',  component: PipelineComponent },
       { path: 'agenda',    component: AgendaComponent },
       { path: 'dashboard', component: DashboardComponent },
-      { path: '', redirectTo: 'pipeline', pathMatch: 'full' },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ]
   },
   { path: '**', redirectTo: '' }

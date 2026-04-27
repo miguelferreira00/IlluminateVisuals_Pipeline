@@ -2,7 +2,6 @@ import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
-import { UserRole } from '../../core/models/models';
 
 @Component({
   selector: 'app-login',
@@ -15,7 +14,7 @@ import { UserRole } from '../../core/models/models';
         <!-- Brand -->
         <div class="brand-block">
           <div class="brand-icon">
-            <img src="assets/logo.png" alt="IV" style="width:40px;height:40px;object-fit:contain;" />
+            <img src="assets/logo.svg" alt="IV" style="width:40px;height:40px;object-fit:contain;" />
           </div>
           <h1 style="font-size:22px;font-weight:700;letter-spacing:-0.02em;color:#1A1A18;margin-bottom:4px;">Illuminate Visuals</h1>
           <p style="font-size:13px;color:#9CA3AF;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;">Pipeline</p>
@@ -43,8 +42,27 @@ import { UserRole } from '../../core/models/models';
             }
           </div>
 
-          <!-- Password (ADMIN only) -->
-          <div class="password-wrap" [style.max-height]="role() === 'ADMIN' ? '90px' : '0'"
+          <!-- Campos CALLER: username + password -->
+          <div class="fields-wrap" [style.max-height]="role() === 'CALLER' ? '200px' : '0'"
+               [style.opacity]="role() === 'CALLER' ? '1' : '0'"
+               [style.margin-bottom]="role() === 'CALLER' ? '16px' : '0'">
+            <div class="fg">
+              <label>Username</label>
+              <input type="text" [(ngModel)]="username" placeholder="caller"
+                     autocomplete="username" (keydown.enter)="submit()" />
+            </div>
+            <div class="fg" style="margin-bottom:0;">
+              <label>Password</label>
+              <input type="password" [(ngModel)]="password" placeholder="············"
+                     autocomplete="current-password" (keydown.enter)="submit()" />
+            </div>
+            @if (error() && role() === 'CALLER') {
+              <p style="font-size:12px;color:#DC2626;margin-top:6px;font-weight:500;">{{ error() }}</p>
+            }
+          </div>
+
+          <!-- Campos ADMIN: só password -->
+          <div class="fields-wrap" [style.max-height]="role() === 'ADMIN' ? '110px' : '0'"
                [style.opacity]="role() === 'ADMIN' ? '1' : '0'"
                [style.margin-bottom]="role() === 'ADMIN' ? '16px' : '0'">
             <div class="fg" style="margin-bottom:0;">
@@ -52,7 +70,7 @@ import { UserRole } from '../../core/models/models';
               <input type="password" [(ngModel)]="password" placeholder="············"
                      autocomplete="current-password" (keydown.enter)="submit()" />
             </div>
-            @if (error()) {
+            @if (error() && role() === 'ADMIN') {
               <p style="font-size:12px;color:#DC2626;margin-top:6px;font-weight:500;">{{ error() }}</p>
             }
           </div>
@@ -88,7 +106,7 @@ import { UserRole } from '../../core/models/models';
     .role-card.active { border-color:#E8D400;background:#FFFDE7; }
     .role-icon { width:28px;height:28px;border-radius:7px;background:#F0F0EC;display:flex;align-items:center;justify-content:center;margin-bottom:8px;transition:background 0.12s; }
     .role-icon.active { background:#E8D400; }
-    .password-wrap { overflow:hidden;transition:max-height 0.22s ease,opacity 0.18s ease; }
+    .fields-wrap { overflow:hidden;transition:max-height 0.25s ease,opacity 0.2s ease; }
     .spinner { width:14px;height:14px;border:2px solid #1A1A18;border-top-color:transparent;border-radius:50%;display:inline-block;animation:spin 0.6s linear infinite; }
   `]
 })
@@ -96,6 +114,7 @@ export class LoginComponent implements OnInit {
   role    = signal<'CALLER' | 'ADMIN'>('CALLER');
   loading = signal(false);
   error   = signal('');
+  username = '';
   password = '';
 
   roles = [
@@ -106,16 +125,16 @@ export class LoginComponent implements OnInit {
   constructor(private auth: AuthService, private router: Router) {}
 
   ngOnInit(): void {
-    // Se já existe sessão válida, vai direto para o pipeline
     this.auth.me().subscribe({
-      next: () => this.router.navigate(['/pipeline']),
-      error: () => {} // sem sessão, fica na página de login
+      next: () => this.router.navigate(['/dashboard']),
+      error: () => {}
     });
   }
 
   selectRole(r: 'CALLER' | 'ADMIN'): void {
     this.role.set(r);
     this.error.set('');
+    this.username = '';
     this.password = '';
   }
 
@@ -123,11 +142,16 @@ export class LoginComponent implements OnInit {
     this.error.set('');
     this.loading.set(true);
 
-    this.auth.login({ role: this.role(), password: this.password || undefined }).subscribe({
-      next: () => this.router.navigate(['/pipeline']),
+    const req = this.role() === 'CALLER'
+      ? { role: this.role(), username: this.username, password: this.password }
+      : { role: this.role(), password: this.password };
+
+    this.auth.login(req).subscribe({
+      next: () => this.router.navigate(['/dashboard']),
       error: (err) => {
         this.loading.set(false);
-        this.error.set(err.status === 401 ? 'Palavra-passe incorreta.' : 'Erro ao entrar. Tenta novamente.');
+        const msg = err.error?.error;
+        this.error.set(msg ?? (err.status === 401 ? 'Credenciais incorretas.' : 'Erro ao entrar. Tenta novamente.'));
       }
     });
   }

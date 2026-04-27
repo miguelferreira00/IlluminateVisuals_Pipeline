@@ -1,5 +1,5 @@
 -- =============================================================
--- CRM Agência Audiovisual — Schema MySQL 8
+-- CRM Illuminate Visuals — Schema MySQL 8
 -- =============================================================
 
 CREATE DATABASE IF NOT EXISTS crm_agencia
@@ -15,6 +15,8 @@ CREATE TABLE users (
   id                    BIGINT          AUTO_INCREMENT PRIMARY KEY,
   nome                  VARCHAR(100)    NOT NULL,
   email                 VARCHAR(150)    NOT NULL UNIQUE,
+  username              VARCHAR(50)     NULL UNIQUE,
+  password_hash         VARCHAR(255)    NULL,
   role                  ENUM('CALLER','PARTNER','ADMIN') NOT NULL DEFAULT 'CALLER',
   google_calendar_token TEXT,
   ativo                 BOOLEAN         NOT NULL DEFAULT TRUE,

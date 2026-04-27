@@ -104,7 +104,7 @@ export class AgendaComponent implements OnInit {
   currentWeek() {
     const days: string[] = [];
     const now = new Date();
-    now.setDate(now.getDate() + this.weekOffset() * 5);
+    now.setDate(now.getDate() + this.weekOffset() * 7);
     for (let i = 0; days.length < 5; i++) {
       const d = new Date(now); d.setDate(now.getDate() - now.getDay() + 1 + i);
       const dow = d.getDay();

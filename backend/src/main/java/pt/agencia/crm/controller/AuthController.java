@@ -11,12 +11,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
-import pt.agencia.crm.config.AppProperties;
 import pt.agencia.crm.dto.auth.LoginRequest;
 import pt.agencia.crm.dto.user.UserResumoResponse;
-import pt.agencia.crm.exception.ResourceNotFoundException;
 import pt.agencia.crm.mapper.UserMapper;
 import pt.agencia.crm.model.User;
 import pt.agencia.crm.model.enums.UserRole;
@@ -33,28 +32,48 @@ public class AuthController {
 
     private final UserRepository userRepository;
     private final CurrentUserService currentUserService;
-    private final AppProperties appProperties;
+    private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request,
                                    HttpServletRequest httpRequest) {
 
-        // ADMIN exige password
-        if (request.role() == UserRole.ADMIN) {
-            if (request.password() == null || !request.password().equals(appProperties.getAdmin().getPassword())) {
+        User user;
+
+        if (request.role() == UserRole.CALLER) {
+            if (request.username() == null || request.username().isBlank()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Username obrigatório"));
+            }
+            if (request.password() == null || request.password().isBlank()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Password obrigatória"));
+            }
+            user = userRepository.findByUsernameAndAtivoTrue(request.username())
+                    .orElse(null);
+            if (user == null || !passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Username ou password incorretos"));
+            }
+
+        } else {
+            // ADMIN — sem username; a password identifica qual admin está a entrar
+            if (request.password() == null || request.password().isBlank()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Palavra-passe obrigatória"));
+            }
+            user = userRepository.findByAtivoTrue().stream()
+                    .filter(u -> u.getRole() == UserRole.ADMIN)
+                    .filter(u -> u.getPasswordHash() != null &&
+                                 passwordEncoder.matches(request.password(), u.getPasswordHash()))
+                    .findFirst()
+                    .orElse(null);
+            if (user == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(Map.of("error", "Palavra-passe incorreta"));
             }
         }
 
-        // Vai buscar o primeiro utilizador ativo com o role pedido
-        User user = userRepository.findByAtivoTrue().stream()
-                .filter(u -> u.getRole() == request.role())
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Nenhum utilizador ativo encontrado com role: " + request.role()));
-
-        // Cria a autenticação e guarda na sessão
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                 user.getEmail(), null,
                 List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))

@@ -1,6 +1,6 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ContactoResumo, ReuniaoRequest } from '../../../core/models/models';
+import { ContactoResumo, CurrentUser, ReuniaoRequest } from '../../../core/models/models';
 
 export interface BookingSlot { data: string; hora: string; }
 
@@ -31,9 +31,9 @@ export interface BookingSlot { data: string; hora: string; }
         </div>
         <div class="fr">
           <div class="fg">
-            <label>Sócio Responsável</label>
+            <label>Diretor Responsável</label>
             <select [(ngModel)]="responsavelId" name="responsavelId">
-              <option value="">Selecionar...</option>
+              <option value="">Selecionar diretor...</option>
               @for (s of socios(); track s.id) { <option [value]="s.id">{{ s.nome }}</option> }
             </select>
           </div>
@@ -64,7 +64,7 @@ export interface BookingSlot { data: string; hora: string; }
 export class BookMeetingModalComponent {
   readonly slot     = input.required<BookingSlot>();
   readonly contacts = input<ContactoResumo[]>([]);
-  readonly socios   = input<{ id: number; nome: string }[]>([]);
+  readonly socios   = input<CurrentUser[]>([]);
   readonly close    = output<void>();
   readonly confirm  = output<ReuniaoRequest>();
 

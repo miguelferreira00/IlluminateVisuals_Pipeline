@@ -12,6 +12,8 @@ public interface ReuniaoRepository extends JpaRepository<Reuniao, Long> {
 
     List<Reuniao> findByEstadoOrderByDataReuniaoAsc(ReuniaoEstado estado);
 
+    List<Reuniao> findByResponsavel_IdAndEstadoOrderByDataReuniaoAsc(Long responsavelId, ReuniaoEstado estado);
+
     List<Reuniao> findByDataReuniaoBetweenOrderByDataReuniaoAsc(LocalDateTime inicio, LocalDateTime fim);
 
     long countByEstadoAndDataReuniaoAfter(ReuniaoEstado estado, LocalDateTime depois);

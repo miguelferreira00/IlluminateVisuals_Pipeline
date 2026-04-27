@@ -57,4 +57,10 @@ public class ReuniaoService {
         return reuniaoRepository.findByEstadoOrderByDataReuniaoAsc(ReuniaoEstado.AGENDADA)
                 .stream().map(ReuniaoMapper::toResponse).toList();
     }
+
+    public List<ReuniaoResponse> listarMinhas(Long responsavelId) {
+        return reuniaoRepository
+                .findByResponsavel_IdAndEstadoOrderByDataReuniaoAsc(responsavelId, ReuniaoEstado.AGENDADA)
+                .stream().map(ReuniaoMapper::toResponse).toList();
+    }
 }

@@ -12,6 +12,7 @@
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/controller/DashboardController.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/controller/ExportController.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/controller/ReuniaoController.java
+/Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/controller/UserController.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/dto/agenda/SlotDisponivelResponse.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/dto/auth/LoginRequest.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/dto/call/CallRequest.java

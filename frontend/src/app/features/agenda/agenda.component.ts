@@ -1,9 +1,9 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { ContactoResumo, Reuniao, ReuniaoRequest, SlotDisponivel } from '../../core/models/models';
+import { ContactoResumo, CurrentUser, Reuniao, ReuniaoRequest, SlotDisponivel } from '../../core/models/models';
 import { AgendaService } from '../../core/services/agenda.service';
 import { ReuniaoService } from '../../core/services/reuniao.service';
 import { ContactoService } from '../../core/services/contacto.service';
-import { AuthService } from '../../core/auth/auth.service';
+import { UserService } from '../../core/services/user.service';
 import { BookMeetingModalComponent, BookingSlot } from './book-meeting-modal/book-meeting-modal.component';
 
 @Component({
@@ -80,7 +80,7 @@ export class AgendaComponent implements OnInit {
   slots     = signal<SlotDisponivel[]>([]);
   reunioes  = signal<Reuniao[]>([]);
   contacts  = signal<ContactoResumo[]>([]);
-  socios    = signal<{ id: number; nome: string }[]>([]);
+  socios    = signal<CurrentUser[]>([]);
   weekOffset = signal(0);
   loading   = signal(false);
   bookingSlot = signal<BookingSlot | null>(null);
@@ -89,7 +89,7 @@ export class AgendaComponent implements OnInit {
     private agendaService: AgendaService,
     private reuniaoService: ReuniaoService,
     private contactoService: ContactoService,
-    private auth: AuthService
+    private userService: UserService
   ) {}
 
   ngOnInit(): void {
@@ -97,8 +97,7 @@ export class AgendaComponent implements OnInit {
     this.agendaService.slots(14, 30).subscribe({ next: s => { this.slots.set(s); this.loading.set(false); }, error: () => this.loading.set(false) });
     this.reuniaoService.listar().subscribe({ next: r => this.reunioes.set(r), error: () => {} });
     this.contactoService.listar(undefined, undefined, undefined, 0, 200).subscribe({ next: p => this.contacts.set(p.content), error: () => {} });
-    const user = this.auth.user();
-    if (user) this.socios.set([{ id: user.id, nome: user.nome }]);
+    this.userService.admins().subscribe({ next: a => this.socios.set(a), error: () => {} });
   }
 
   currentWeek() {

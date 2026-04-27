@@ -11,6 +11,10 @@ export class ReuniaoService {
     return this.http.get<Reuniao[]>('/api/reunioes', { withCredentials: true });
   }
 
+  minhas(): Observable<Reuniao[]> {
+    return this.http.get<Reuniao[]>('/api/reunioes/minhas', { withCredentials: true });
+  }
+
   criar(req: ReuniaoRequest): Observable<Reuniao> {
     return this.http.post<Reuniao>('/api/reunioes', req, { withCredentials: true });
   }

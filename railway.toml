@@ -1,8 +1,0 @@
-[build]
-# Força nixpacks a reconhecer como Maven
-builder = "nixpacks"
-nixPacksConfigFile = "nixpacks.toml"
-
-[deploy]
-startCommand = "java -jar backend/target/crm-0.0.1-SNAPSHOT.jar"
-port = 8080

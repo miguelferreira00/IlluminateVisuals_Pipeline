@@ -11,8 +11,8 @@ import pt.agencia.crm.dto.contacto.ContactoResumoResponse;
 import pt.agencia.crm.exception.ResourceNotFoundException;
 import pt.agencia.crm.mapper.ContactoMapper;
 import pt.agencia.crm.model.Contacto;
-import pt.agencia.crm.model.enums.ContactoEstado;
 import pt.agencia.crm.model.enums.Setor;
+import pt.agencia.crm.repository.CallRepository;
 import pt.agencia.crm.repository.ContactoRepository;
 import pt.agencia.crm.repository.ContactoSpecification;
 
@@ -22,6 +22,7 @@ import pt.agencia.crm.repository.ContactoSpecification;
 public class ContactoService {
 
     private final ContactoRepository contactoRepository;
+    private final CallRepository callRepository;
 
     public Page<ContactoResumoResponse> listar(ContactoEstado estado, Setor setor, String search, Pageable pageable) {
         return contactoRepository
@@ -50,10 +51,10 @@ public class ContactoService {
     }
 
     @Transactional
-    public void arquivar(Long id) {
+    public void eliminar(Long id) {
         Contacto contacto = contactoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Contacto", id));
-        contacto.setEstado(ContactoEstado.PERDIDO);
-        contactoRepository.save(contacto);
+        callRepository.deleteAll(callRepository.findByContactoIdOrderByDataCallDesc(id));
+        contactoRepository.delete(contacto);
     }
 }

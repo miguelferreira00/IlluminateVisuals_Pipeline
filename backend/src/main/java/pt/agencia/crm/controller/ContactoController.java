@@ -51,10 +51,9 @@ public class ContactoController {
         return contactoService.atualizar(id, request);
     }
 
-    // DELETE /api/contactos/1  (soft delete — muda estado para PERDIDO)
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> arquivar(@PathVariable Long id) {
-        contactoService.arquivar(id);
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        contactoService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
 }

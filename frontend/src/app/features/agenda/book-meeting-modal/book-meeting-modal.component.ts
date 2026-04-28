@@ -34,7 +34,12 @@ export interface BookingSlot { data: string; hora: string; }
             <label>Diretor Responsável</label>
             <select [(ngModel)]="responsavelId" name="responsavelId">
               <option value="">Selecionar diretor...</option>
-              @for (s of socios(); track s.id) { <option [value]="s.id">{{ s.nome }}</option> }
+              @for (s of socios(); track s.id) {
+                <option [value]="s.id" [disabled]="isUnavailable(s.id)"
+                        [style.color]="isUnavailable(s.id) ? '#9CA3AF' : 'inherit'">
+                  {{ s.nome }}{{ isUnavailable(s.id) ? ' — indisponível' : '' }}
+                </option>
+              }
             </select>
           </div>
           <div class="fg">
@@ -62,11 +67,14 @@ export interface BookingSlot { data: string; hora: string; }
   `
 })
 export class BookMeetingModalComponent {
-  readonly slot     = input.required<BookingSlot>();
-  readonly contacts = input<ContactoResumo[]>([]);
-  readonly socios   = input<CurrentUser[]>([]);
-  readonly close    = output<void>();
-  readonly confirm  = output<ReuniaoRequest>();
+  readonly slot                = input.required<BookingSlot>();
+  readonly contacts            = input<ContactoResumo[]>([]);
+  readonly socios              = input<CurrentUser[]>([]);
+  readonly unavailableAdminIds = input<number[]>([]);
+  readonly close               = output<void>();
+  readonly confirm             = output<ReuniaoRequest>();
+
+  isUnavailable(id: number): boolean { return this.unavailableAdminIds().includes(id); }
 
   contactoId  = '';
   responsavelId = '';

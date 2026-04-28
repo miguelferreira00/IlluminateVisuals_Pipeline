@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/disponibilidade")
@@ -22,6 +23,7 @@ public class IndisponibilidadeController {
     private final IndisponibilidadeRepository repo;
     private final CurrentUserService currentUserService;
 
+    // Indisponibilidade de um admin específico (para o When2Meet do próprio admin)
     @GetMapping
     public List<String> get(
             @RequestParam Long adminId,
@@ -33,6 +35,24 @@ public class IndisponibilidadeController {
                 .stream()
                 .map(i -> i.getDataHora().toString())
                 .toList();
+    }
+
+    // Indisponibilidade de TODOS os admins — para mostrar na vista semanal
+    // Retorna: Map<slotISO, [{id, nome}]>
+    @GetMapping("/todos")
+    public Map<String, List<Map<String, Object>>> todos(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim
+    ) {
+        return repo.findByDataHoraBetween(dataInicio.atStartOfDay(), dataFim.atTime(23, 59))
+                .stream()
+                .collect(Collectors.groupingBy(
+                        i -> i.getDataHora().toString().substring(0, 16),
+                        Collectors.mapping(
+                                i -> Map.<String, Object>of("id", i.getAdmin().getId(), "nome", i.getAdmin().getNome()),
+                                Collectors.toList()
+                        )
+                ));
     }
 
     @PostMapping("/toggle")

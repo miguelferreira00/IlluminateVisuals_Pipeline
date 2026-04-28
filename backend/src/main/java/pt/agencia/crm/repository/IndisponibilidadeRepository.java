@@ -12,4 +12,6 @@ public interface IndisponibilidadeRepository extends JpaRepository<AdminIndispon
     List<AdminIndisponibilidade> findByAdmin_IdAndDataHoraBetween(Long adminId, LocalDateTime inicio, LocalDateTime fim);
 
     Optional<AdminIndisponibilidade> findByAdmin_IdAndDataHora(Long adminId, LocalDateTime dataHora);
+
+    List<AdminIndisponibilidade> findByDataHoraBetween(LocalDateTime inicio, LocalDateTime fim);
 }

@@ -62,6 +62,7 @@ const HORAS = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30',
         <div style="display:flex;gap:16px;font-size:12px;color:#6B6960;flex-wrap:wrap;">
           <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:3px;background:#ECFDF5;border:1px solid #6EE7B7;display:inline-block;"></span>Livre</span>
           <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:3px;background:#F3E8FF;border:1px solid #DDD6FE;display:inline-block;"></span>Reunião marcada</span>
+          <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:3px;background:#FEE2E2;border:1px solid #FCA5A5;display:inline-block;"></span>Ocupado</span>
         </div>
       </div>
 
@@ -79,19 +80,30 @@ const HORAS = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30',
                   <div style="font-size:11px;margin-top:2px;color:#059669;">{{ freeCount(day) }} livres</div>
                 </div>
                 <div style="display:flex;flex-direction:column;gap:4px;">
-                  @for (r of meetingsForDay(day); track r.id) {
-                    <div style="padding:7px 10px;border-radius:7px;background:#F3E8FF;border:1px solid #DDD6FE;font-size:12px;color:#7E22CE;">
-                      <div style="font-weight:700;">{{ timeOf(r.dataReuniao) }} · {{ r.responsavel?.nome ?? '—' }}</div>
-                      <div style="font-size:11px;opacity:.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.contacto.empresa }}</div>
-                      @if (r.criadoPor) {
-                        <div style="font-size:10px;opacity:.65;margin-top:2px;">por {{ r.criadoPor.nome }}</div>
-                      }
-                    </div>
-                  }
-                  @for (slot of freeSlots(day); track slot.inicio) {
-                    <button (click)="book({ data: day, hora: timeOf(slot.inicio) })" class="slot-btn">
-                      {{ timeOf(slot.inicio) }} <span style="opacity:.6;font-size:11px;">livre</span>
-                    </button>
+                  @for (slot of allSlotsForDay(day); track slot.inicio) {
+                    @let hora = timeOf(slot.inicio);
+                    @let meeting = meetingAtSlot(day, hora);
+                    @let indisponivel = getSlotIndisponivel(day, hora);
+                    @if (meeting) {
+                      <div style="padding:7px 10px;border-radius:7px;background:#F3E8FF;border:1px solid #DDD6FE;font-size:12px;color:#7E22CE;">
+                        <div style="font-weight:700;">{{ hora }} · {{ meeting.responsavel?.nome ?? '—' }}</div>
+                        <div style="font-size:11px;opacity:.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ meeting.contacto.empresa }}</div>
+                        @if (meeting.criadoPor) {
+                          <div style="font-size:10px;opacity:.65;margin-top:2px;">por {{ meeting.criadoPor.nome }}</div>
+                        }
+                      </div>
+                    } @else if (indisponivel.length > 0) {
+                      <div style="padding:6px 10px;border-radius:7px;background:#FEE2E2;border:1px solid #FCA5A5;font-size:12px;color:#DC2626;">
+                        <span style="font-weight:700;">{{ hora }}</span>
+                        <span style="font-size:11px;margin-left:5px;">
+                          {{ indisponivel.length === 1 ? indisponivel[0].nome + ' ocupado' : indisponivel.length + ' pessoas indisponíveis' }}
+                        </span>
+                      </div>
+                    } @else {
+                      <button (click)="book({ data: day, hora })" class="slot-btn">
+                        {{ hora }} <span style="opacity:.6;font-size:11px;">livre</span>
+                      </button>
+                    }
                   }
                 </div>
               </div>
@@ -140,6 +152,7 @@ const HORAS = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30',
         [slot]="bookingSlot()!"
         [contacts]="contacts()"
         [socios]="socios()"
+        [unavailableAdminIds]="unavailableForSlot()"
         (close)="bookingSlot.set(null)"
         (confirm)="onConfirm($event)" />
     }
@@ -227,6 +240,14 @@ export class AgendaComponent implements OnInit {
   dispWeekOffset      = signal(0);
   dispIndisponivel    = signal<Set<string>>(new Set());
   dispLoading         = signal(false);
+  allIndisponivel     = signal<Record<string, {id: number, nome: string}[]>>({});
+
+  readonly unavailableForSlot = computed(() => {
+    const slot = this.bookingSlot();
+    if (!slot) return [];
+    const key = `${slot.data}T${slot.hora}`;
+    return (this.allIndisponivel()[key] ?? []).map(a => a.id);
+  });
 
   private dragging    = false;
   private dragValue   = false; // true = mark unavailable, false = remove
@@ -242,6 +263,7 @@ export class AgendaComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSlots();
+    this.loadTodos();
     this.reuniaoService.listar().subscribe({ next: r => this.reunioes.set(r), error: () => {} });
     this.contactoService.listar(undefined, undefined, undefined, 0, 200).subscribe({ next: p => this.contacts.set(p.content), error: () => {} });
     this.userService.admins().subscribe({ next: a => this.socios.set(a), error: () => {} });
@@ -255,12 +277,21 @@ export class AgendaComponent implements OnInit {
     });
   }
 
+  loadTodos(): void {
+    const days = this.currentDays();
+    if (!days.length) return;
+    this.dispService.todos(days[0], days[4]).subscribe({
+      next: m => this.allIndisponivel.set(m),
+      error: () => {}
+    });
+  }
+
   // ── Week view ──────────────────────────────────────────────────
 
   maxOffset() { return this.viewMode() === 'week' ? 25 : 5; }
 
-  prev() { this.offset.update(o => Math.max(0, o - 1)); }
-  next() { this.offset.update(o => Math.min(this.maxOffset(), o + 1)); }
+  prev() { this.offset.update(o => Math.max(0, o - 1)); if (this.viewMode() === 'week') this.loadTodos(); }
+  next() { this.offset.update(o => Math.min(this.maxOffset(), o + 1)); if (this.viewMode() === 'week') this.loadTodos(); }
 
   currentDays(): string[] {
     const days: string[] = [];
@@ -321,9 +352,16 @@ export class AgendaComponent implements OnInit {
 
   dayLabel(d: string) { return new Date(d + 'T12:00:00').toLocaleDateString('pt-PT', { weekday: 'short', day: '2-digit', month: 'short' }); }
   timeOf(dt: string)  { return dt.includes('T') ? dt.slice(11, 16) : dt.slice(0, 5); }
-  freeSlots(day: string)      { return this.slots().filter(s => s.inicio.startsWith(day) && s.livre); }
-  freeCount(day: string)      { return this.freeSlots(day).length; }
-  meetingsForDay(day: string) { return this.reunioes().filter(r => r.dataReuniao.startsWith(day)); }
+  allSlotsForDay(day: string)  { return this.slots().filter(s => s.inicio.startsWith(day)); }
+  freeSlots(day: string)       { return this.slots().filter(s => s.inicio.startsWith(day) && s.livre); }
+  freeCount(day: string)       { return this.freeSlots(day).length; }
+  meetingsForDay(day: string)  { return this.reunioes().filter(r => r.dataReuniao.startsWith(day)); }
+  meetingAtSlot(day: string, hora: string) {
+    return this.reunioes().find(r => r.dataReuniao.startsWith(day) && r.dataReuniao.slice(11, 16) === hora);
+  }
+  getSlotIndisponivel(day: string, hora: string): {id: number, nome: string}[] {
+    return this.allIndisponivel()[`${day}T${hora}`] ?? [];
+  }
 
   book(slot: BookingSlot) { this.bookingSlot.set(slot); }
 

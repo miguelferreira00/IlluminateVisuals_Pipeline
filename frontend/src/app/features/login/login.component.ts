@@ -14,7 +14,7 @@ import { AuthService } from '../../core/auth/auth.service';
         <!-- Brand -->
         <div class="brand-block">
           <div class="brand-icon">
-            <img src="assets/logo.svg" alt="IV" style="width:40px;height:40px;object-fit:contain;" />
+            <img src="logo.svg" alt="IV" style="width:40px;height:40px;object-fit:contain;" />
           </div>
           <h1 style="font-size:22px;font-weight:700;letter-spacing:-0.02em;color:#1A1A18;margin-bottom:4px;">Illuminate Visuals</h1>
           <p style="font-size:13px;color:#9CA3AF;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;">Pipeline</p>

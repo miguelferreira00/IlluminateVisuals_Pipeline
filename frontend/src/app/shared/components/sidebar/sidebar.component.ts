@@ -18,7 +18,7 @@ const NAV_ITEMS: { id: NavView; label: string; icon: string; adminOnly?: boolean
     <div class="sidebar">
       <div class="sidebar-brand">
         <div class="brand-icon">
-          <img src="assets/logo.svg" alt="IV" style="width:26px;height:26px;object-fit:contain;" />
+          <img src="logo.svg" alt="IV" style="width:26px;height:26px;object-fit:contain;" />
         </div>
         <div>
           <div style="font-size:13px;font-weight:700;color:#1A1A18;line-height:1.2;">Illuminate</div>

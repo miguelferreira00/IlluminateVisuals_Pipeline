@@ -25,6 +25,8 @@
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/dto/dashboard/SetorScoreResponse.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/dto/reuniao/ReuniaoRequest.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/dto/reuniao/ReuniaoResponse.java
+/Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/dto/user/ChangePasswordRequest.java
+/Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/dto/user/CreateCallerRequest.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/dto/user/UserResumoResponse.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/exception/GlobalExceptionHandler.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/exception/ResourceNotFoundException.java

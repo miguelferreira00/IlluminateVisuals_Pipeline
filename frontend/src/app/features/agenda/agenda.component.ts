@@ -92,17 +92,20 @@ const HORAS = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30',
                           <div style="font-size:10px;opacity:.65;margin-top:2px;">por {{ meeting.criadoPor.nome }}</div>
                         }
                       </div>
-                    } @else if (indisponivel.length > 0) {
-                      <div style="padding:6px 10px;border-radius:7px;background:#FEE2E2;border:1px solid #FCA5A5;font-size:12px;color:#DC2626;">
-                        <span style="font-weight:700;">{{ hora }}</span>
-                        <span style="font-size:11px;margin-left:5px;">
-                          {{ indisponivel.length === 1 ? indisponivel[0].nome + ' ocupado' : indisponivel.length + ' pessoas indisponíveis' }}
-                        </span>
-                      </div>
                     } @else {
-                      <button (click)="book({ data: day, hora })" class="slot-btn">
-                        {{ hora }} <span style="opacity:.6;font-size:11px;">livre</span>
-                      </button>
+                      @let count = indisponivel.length;
+                      @let total = socios().length;
+                      @let allUnavail = count > 0 && total > 0 && count >= total;
+                      <div
+                        [style.background]="slotBg(count, total)"
+                        [style.border]="'1px solid ' + slotBorderColor(count, total)"
+                        [style.color]="count === 0 ? '#047857' : '#DC2626'"
+                        [style.cursor]="allUnavail ? 'default' : 'pointer'"
+                        style="padding:6px 10px;border-radius:7px;font-size:12px;font-weight:600;width:100%;text-align:left;display:block;"
+                        (click)="allUnavail ? null : book({ data: day, hora })">
+                        <span>{{ hora }}</span>
+                        <span style="font-size:11px;margin-left:5px;font-weight:500;opacity:.85;">{{ slotLabel(indisponivel) }}</span>
+                      </div>
                     }
                   }
                 </div>
@@ -361,6 +364,28 @@ export class AgendaComponent implements OnInit {
   }
   getSlotIndisponivel(day: string, hora: string): {id: number, nome: string}[] {
     return this.allIndisponivel()[`${day}T${hora}`] ?? [];
+  }
+
+  slotBg(count: number, total: number): string {
+    if (count === 0 || total === 0) return '#ECFDF5';
+    const ratio = count / total;
+    if (ratio >= 1)    return '#FECACA'; // todos — vermelho forte
+    if (ratio > 0.5)   return '#FEE2E2'; // maioria — vermelho médio
+    return '#FFF5F5';                    // minoria — vermelho muito claro
+  }
+
+  slotBorderColor(count: number, total: number): string {
+    if (count === 0 || total === 0) return '#A7F3D0';
+    const ratio = count / total;
+    if (ratio >= 1)  return '#F87171';
+    if (ratio > 0.5) return '#FCA5A5';
+    return '#FECACA';
+  }
+
+  slotLabel(indisponivel: {id: number, nome: string}[]): string {
+    if (indisponivel.length === 0)  return 'livre';
+    if (indisponivel.length === 1)  return indisponivel[0].nome + ' ocupado';
+    return indisponivel.length + ' pessoas indisponíveis';
   }
 
   book(slot: BookingSlot) { this.bookingSlot.set(slot); }

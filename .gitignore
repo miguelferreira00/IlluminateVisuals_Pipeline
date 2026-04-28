@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Backend compiled artifacts
+backend/target/
+
+# Frontend build output (Cloudflare builds from source)
+frontend/dist/
+frontend/.angular/
+
+# Node modules
+frontend/node_modules/
+
+# Environment files
+.env
+*.env.local

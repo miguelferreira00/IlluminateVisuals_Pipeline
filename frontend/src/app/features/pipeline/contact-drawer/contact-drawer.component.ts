@@ -2,6 +2,8 @@ import { Component, input, output, signal, OnChanges } from '@angular/core';
 import { Contacto, Call, ContactoEstado, ESTADO_LABELS, ESTADO_COLORS, SETOR_LABELS, RESULTADO_LABELS, RESULTADO_COLORS, PROXIMO_PASSO_LABELS, AVATAR_COLORS } from '../../../core/models/models';
 import { EstadoBadgeComponent } from '../../../shared/components/estado-badge/estado-badge.component';
 import { CallService } from '../../../core/services/call.service';
+import { AuthService } from '../../../core/auth/auth.service';
+import { ContactoService } from '../../../core/services/contacto.service';
 
 function fd(d: string) { return d ? new Date(d).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' }) : '—'; }
 function fdt(d: string) { return d ? fd(d) + ' · ' + new Date(d).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : '—'; }
@@ -105,6 +107,14 @@ function scoreColor(s: number) { return s >= 8 ? '#059669' : s >= 5 ? '#D97706' 
             <div>Criado em: <strong style="color:#1A1A18;">{{ fd(contact().criadoEm) }}</strong></div>
             <div>Atualizado: <strong style="color:#1A1A18;">{{ fd(contact().atualizadoEm) }}</strong></div>
           </div>
+          @if (auth.isAdmin()) {
+            <div style="border-top:1px solid #E2E2DC;padding-top:14px;margin-top:6px;">
+              <button (click)="eliminar()" style="background:none;border:1.5px solid #FCA5A5;color:#DC2626;padding:6px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                Eliminar contacto
+              </button>
+            </div>
+          }
         }
         @if (tab() === 'calls') {
           @if (calls().length === 0) {
@@ -140,6 +150,7 @@ export class ContactDrawerComponent implements OnChanges {
   readonly newCall    = output<void>();
   readonly openAgenda = output<void>();
   readonly estadoChanged = output<ContactoEstado>();
+  readonly deleted    = output<number>();
 
   tab    = signal<'info' | 'calls'>('info');
   calls  = signal<Call[]>([]);
@@ -148,7 +159,11 @@ export class ContactDrawerComponent implements OnChanges {
   readonly estados = Object.entries(ESTADO_LABELS).map(([k, v]) => ({ k: k as ContactoEstado, v }));
   readonly estadoColors = ESTADO_COLORS;
 
-  constructor(private callService: CallService) {}
+  constructor(
+    private readonly callService: CallService,
+    private readonly contactoService: ContactoService,
+    readonly auth: AuthService
+  ) {}
 
   ngOnChanges(): void { this.loadCalls(); }
 
@@ -160,6 +175,13 @@ export class ContactDrawerComponent implements OnChanges {
   }
 
   changeEstado(e: ContactoEstado): void { this.estadoChanged.emit(e); }
+
+  eliminar(): void {
+    if (!confirm(`Eliminar ${this.contact().nomeDecisor}? Esta ação não pode ser desfeita.`)) return;
+    this.contactoService.eliminar(this.contact().id).subscribe(() => {
+      this.deleted.emit(this.contact().id);
+    });
+  }
   avatarBg()  { return avatarColor(this.contact().id); }
   setor()     { return SETOR_LABELS[this.contact().setor] ?? this.contact().setor; }
   scoreColor  = scoreColor;

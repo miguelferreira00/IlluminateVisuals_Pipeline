@@ -32,4 +32,8 @@ export class ContactoService {
     const { empresa, setor, nomeDecisor, cargo, telefone, email, linkedinUrl, scorePotencial, notas } = contacto;
     return this.atualizar(id, { empresa, setor, nomeDecisor, cargo, telefone, email, linkedinUrl, estado, scorePotencial, notas });
   }
+
+  eliminar(id: number): Observable<void> {
+    return this.http.delete<void>(`/api/contactos/${id}`, { withCredentials: true });
+  }
 }

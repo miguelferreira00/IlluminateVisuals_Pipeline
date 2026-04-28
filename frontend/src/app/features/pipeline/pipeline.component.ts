@@ -129,7 +129,8 @@ function scoreColor(s: number) { return s >= 8 ? '#059669' : s >= 5 ? '#D97706' 
         (close)="selectedContact.set(null)"
         (newCall)="showNewCall.set(true)"
         (openAgenda)="goAgenda()"
-        (estadoChanged)="onEstadoChanged($event)" />
+        (estadoChanged)="onEstadoChanged($event)"
+        (deleted)="onContactDeleted($event)" />
     }
 
     <!-- New Call Modal -->
@@ -218,6 +219,11 @@ export class PipelineComponent implements OnInit {
 
   onContactSaved(req: ContactoRequest): void {
     this.contactoService.criar(req).subscribe(() => { this.showNewContact.set(false); this.load(); });
+  }
+
+  onContactDeleted(id: number): void {
+    this.contacts.update(list => list.filter(c => c.id !== id));
+    this.selectedContact.set(null);
   }
 
   goAgenda(): void { this.selectedContact.set(null); this.router.navigate(['/agenda']); }

@@ -27,6 +27,7 @@ public class ReuniaoService {
     private final ContactoRepository contactoRepository;
     private final UserRepository userRepository;
     private final GoogleCalendarService googleCalendarService;
+    private final CurrentUserService currentUserService;
 
     @Transactional
     public ReuniaoResponse criar(ReuniaoRequest request) {
@@ -39,7 +40,8 @@ public class ReuniaoService {
                     .orElseThrow(() -> new ResourceNotFoundException("Utilizador", request.responsavelUserId()));
         }
 
-        Reuniao reuniao = ReuniaoMapper.toEntity(request, contacto, responsavel);
+        User criadoPor = currentUserService.getCurrentUser();
+        Reuniao reuniao = ReuniaoMapper.toEntity(request, contacto, responsavel, criadoPor);
 
         // Tenta criar evento no Google Calendar — falha silenciosa se token não existir
         if (responsavel != null && responsavel.getGoogleCalendarToken() != null) {

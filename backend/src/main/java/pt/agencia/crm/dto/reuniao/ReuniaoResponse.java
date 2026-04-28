@@ -13,6 +13,7 @@ public record ReuniaoResponse(
         LocalDateTime dataReuniao,
         Integer duracaoMinutos,
         UserResumoResponse responsavel,
+        UserResumoResponse criadoPor,
         ReuniaoEstado estado,
         String notas,
         LocalDateTime criadoEm

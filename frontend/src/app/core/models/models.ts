@@ -98,6 +98,7 @@ export interface Reuniao {
   dataReuniao: string;
   duracaoMinutos: number;
   responsavel: CurrentUser | null;
+  criadoPor: CurrentUser | null;
   estado: ReuniaoEstado;
   notas: string;
   criadoEm: string;

@@ -35,6 +35,7 @@ public class SecurityConfig {
                 // Gestão de utilizadores só para ADMIN (exceto /admins que é para todos autenticados)
                 .requestMatchers(HttpMethod.GET, "/api/users/admins").authenticated()
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/disponibilidade/**").hasRole("ADMIN")
                 // Export e DELETE só para ADMIN
                 .requestMatchers("/api/export/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")

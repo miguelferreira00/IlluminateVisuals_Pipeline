@@ -75,7 +75,7 @@ public class AuthController {
         }
 
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                user.getEmail(), null,
+                String.valueOf(user.getId()), null,
                 List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
         );
 

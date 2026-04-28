@@ -3,9 +3,11 @@ package pt.agencia.crm.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pt.agencia.crm.dto.agenda.SlotDisponivelResponse;
+import pt.agencia.crm.model.AdminIndisponibilidade;
 import pt.agencia.crm.model.Reuniao;
 import pt.agencia.crm.model.User;
 import pt.agencia.crm.model.enums.ReuniaoEstado;
+import pt.agencia.crm.repository.IndisponibilidadeRepository;
 import pt.agencia.crm.repository.ReuniaoRepository;
 
 import java.time.DayOfWeek;
@@ -14,6 +16,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,8 +27,9 @@ public class GoogleCalendarService {
     private static final LocalTime DIA_FIM    = LocalTime.of(18, 0);
 
     private final ReuniaoRepository reuniaoRepository;
+    private final IndisponibilidadeRepository indisponibilidadeRepository;
 
-    public List<SlotDisponivelResponse> calcularSlotsLivres(int dias, int duracaoMinutos) {
+    public List<SlotDisponivelResponse> calcularSlotsLivres(int dias, int duracaoMinutos, Long adminId) {
         LocalDate hoje = LocalDate.now();
         LocalDateTime periodoFim = hoje.plusDays(dias).atTime(23, 59);
 
@@ -33,6 +38,12 @@ public class GoogleCalendarService {
                 .stream()
                 .filter(r -> r.getEstado() == ReuniaoEstado.AGENDADA)
                 .toList();
+
+        Set<LocalDateTime> indisponivel = adminId != null
+                ? indisponibilidadeRepository
+                        .findByAdmin_IdAndDataHoraBetween(adminId, hoje.atStartOfDay(), periodoFim)
+                        .stream().map(AdminIndisponibilidade::getDataHora).collect(Collectors.toSet())
+                : Set.of();
 
         List<SlotDisponivelResponse> slots = new ArrayList<>();
 
@@ -51,7 +62,9 @@ public class GoogleCalendarService {
                     return r.getDataReuniao().isBefore(fim) && rFim.isAfter(inicio);
                 });
 
-                slots.add(new SlotDisponivelResponse(inicio, fim, !ocupado));
+                boolean adminIndisponivel = indisponivel.contains(inicio);
+
+                slots.add(new SlotDisponivelResponse(inicio, fim, !ocupado && !adminIndisponivel));
                 atual = atual.plusMinutes(duracaoMinutos);
             }
         }

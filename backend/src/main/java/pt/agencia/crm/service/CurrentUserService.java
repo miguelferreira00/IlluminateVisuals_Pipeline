@@ -19,9 +19,15 @@ public class CurrentUserService {
         if (auth == null || !auth.isAuthenticated()) {
             throw new IllegalStateException("Utilizador não autenticado");
         }
-        // O principal é o email do utilizador, guardado no login
-        String email = auth.getName();
-        return userRepository.findByEmailAndAtivoTrue(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Utilizador não encontrado: " + email));
+        String name = auth.getName();
+        try {
+            Long userId = Long.parseLong(name);
+            return userRepository.findById(userId)
+                    .filter(User::getAtivo)
+                    .orElseThrow(() -> new ResourceNotFoundException("Utilizador", userId));
+        } catch (NumberFormatException e) {
+            return userRepository.findByEmailAndAtivoTrue(name)
+                    .orElseThrow(() -> new ResourceNotFoundException("Utilizador não encontrado: " + name));
+        }
     }
 }

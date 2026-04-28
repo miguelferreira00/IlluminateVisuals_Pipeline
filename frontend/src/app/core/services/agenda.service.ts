@@ -7,8 +7,9 @@ import { SlotDisponivel } from '../models/models';
 export class AgendaService {
   constructor(private http: HttpClient) {}
 
-  slots(dias = 14, duracaoMinutos = 30): Observable<SlotDisponivel[]> {
-    const params = new HttpParams().set('dias', dias).set('duracaoMinutos', duracaoMinutos);
+  slots(dias = 180, duracaoMinutos = 30, adminId?: number): Observable<SlotDisponivel[]> {
+    let params = new HttpParams().set('dias', dias).set('duracaoMinutos', duracaoMinutos);
+    if (adminId) params = params.set('adminId', adminId);
     return this.http.get<SlotDisponivel[]>('/api/agenda/slots', { params, withCredentials: true });
   }
 }

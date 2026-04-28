@@ -17,12 +17,12 @@ public class AgendaController {
 
     private final GoogleCalendarService googleCalendarService;
 
-    // GET /api/agenda/slots?dias=14&duracaoMinutos=30
     @GetMapping("/slots")
     public List<SlotDisponivelResponse> slots(
-            @RequestParam(defaultValue = "14") int dias,
-            @RequestParam(defaultValue = "30") int duracaoMinutos
+            @RequestParam(defaultValue = "180") int dias,
+            @RequestParam(defaultValue = "30") int duracaoMinutos,
+            @RequestParam(required = false) Long adminId
     ) {
-        return googleCalendarService.calcularSlotsLivres(dias, duracaoMinutos);
+        return googleCalendarService.calcularSlotsLivres(dias, duracaoMinutos, adminId);
     }
 }

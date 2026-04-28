@@ -40,6 +40,10 @@ public class Reuniao {
     @JoinColumn(name = "responsavel_user_id")
     private User responsavel;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "criado_por_user_id")
+    private User criadoPor;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
     @Builder.Default

@@ -157,7 +157,10 @@ export class UtilizadoresComponent implements OnInit {
     };
     this.userService.criarCaller(req).subscribe({
       next: u => { this.users.update(list => [...list, u]); this.fecharModal(); },
-      error: () => this.erroModal.set('Username já existe ou erro ao criar.')
+      error: (err) => {
+        const msg = err?.error?.error;
+        this.erroModal.set(msg ?? 'Erro ao criar utilizador.');
+      }
     });
   }
 

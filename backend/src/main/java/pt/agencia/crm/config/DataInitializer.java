@@ -26,7 +26,7 @@ public class DataInitializer implements ApplicationRunner {
         createAdminIfAbsent("Luis",   "luis@illuminatevisuals.pt",   "luis");
 
         // Callers — login com username + password
-        createCallerIfAbsent("caller", "11022005", "Caller", "caller@illuminatevisuals.pt");
+        createCallerIfAbsent("caller", "11022005", "Caller", null);
     }
 
     private void createAdminIfAbsent(String nome, String email, String password) {
@@ -44,7 +44,7 @@ public class DataInitializer implements ApplicationRunner {
         if (userRepository.findByUsernameAndAtivoTrue(username).isPresent()) return;
         userRepository.save(User.builder()
                 .nome(nome)
-                .email(email)
+                .email(email) // pode ser null
                 .username(username)
                 .passwordHash(passwordEncoder.encode(password))
                 .role(UserRole.CALLER)

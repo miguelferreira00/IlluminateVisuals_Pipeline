@@ -46,9 +46,7 @@ public class UserController {
         if (userRepository.findByUsernameAndAtivoTrue(req.username()).isPresent()) {
             return ResponseEntity.badRequest().body(Map.of("error", "Username já existe"));
         }
-        String email = (req.email() != null && !req.email().isBlank())
-                ? req.email()
-                : req.username() + "@illuminatevisuals.pt";
+        String email = (req.email() != null && !req.email().isBlank()) ? req.email() : null;
         User user = User.builder()
                 .nome(req.nome())
                 .email(email)

@@ -22,7 +22,7 @@ public class User {
     @Column(nullable = false, length = 100)
     private String nome;
 
-    @Column(nullable = false, unique = true, length = 150)
+    @Column(unique = true, length = 150)
     private String email;
 
     @Enumerated(EnumType.STRING)

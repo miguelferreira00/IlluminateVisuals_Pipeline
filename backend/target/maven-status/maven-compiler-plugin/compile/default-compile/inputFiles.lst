@@ -11,6 +11,7 @@
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/controller/ContactoController.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/controller/DashboardController.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/controller/ExportController.java
+/Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/controller/IndisponibilidadeController.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/controller/ReuniaoController.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/controller/UserController.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/dto/agenda/SlotDisponivelResponse.java
@@ -34,6 +35,7 @@
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/mapper/ContactoMapper.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/mapper/ReuniaoMapper.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/mapper/UserMapper.java
+/Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/model/AdminIndisponibilidade.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/model/Call.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/model/Contacto.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/model/Reuniao.java
@@ -47,6 +49,7 @@
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/repository/CallRepository.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/repository/ContactoRepository.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/repository/ContactoSpecification.java
+/Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/repository/IndisponibilidadeRepository.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/repository/ReuniaoRepository.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/repository/UserRepository.java
 /Users/miguel/Desktop/IlluminateVisuals_Pipeline/backend/src/main/java/pt/agencia/crm/service/CallService.java

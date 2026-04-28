@@ -19,4 +19,6 @@ public interface ReuniaoRepository extends JpaRepository<Reuniao, Long> {
     long countByEstadoAndDataReuniaoAfter(ReuniaoEstado estado, LocalDateTime depois);
 
     Optional<Reuniao> findByGoogleEventId(String googleEventId);
+
+    List<Reuniao> findByContacto_Id(Long contactoId);
 }

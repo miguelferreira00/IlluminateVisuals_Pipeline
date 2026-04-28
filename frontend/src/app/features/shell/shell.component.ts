@@ -1,12 +1,10 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
-import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
+import { SidebarComponent, NavView } from '../../shared/components/sidebar/sidebar.component';
 import { AuthService } from '../../core/auth/auth.service';
 import { ContactoService } from '../../core/services/contacto.service';
 import { ContactoResumo } from '../../core/models/models';
-
-type NavView = 'pipeline' | 'agenda' | 'dashboard';
 
 @Component({
   selector: 'app-shell',
@@ -40,10 +38,10 @@ export class ShellComponent implements OnInit {
     this.loadContacts();
     this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe((e: any) => {
       const path = e.urlAfterRedirects.split('/')[1] as NavView;
-      if (['pipeline','agenda','dashboard'].includes(path)) this.activeView.set(path);
+      if (['pipeline','agenda','dashboard','utilizadores'].includes(path)) this.activeView.set(path);
     });
     const path = this.router.url.split('/')[1] as NavView;
-    if (['pipeline','agenda','dashboard'].includes(path)) this.activeView.set(path);
+    if (['pipeline','agenda','dashboard','utilizadores'].includes(path)) this.activeView.set(path);
   }
 
   navigate(view: NavView): void {

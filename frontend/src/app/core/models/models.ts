@@ -12,6 +12,15 @@ export interface CurrentUser {
   role: UserRole;
 }
 
+export interface UserResumo {
+  id: number;
+  nome: string;
+  email: string;
+  role: UserRole;
+  username: string | null;
+  ativo: boolean;
+}
+
 export interface Contacto {
   id: number;
   empresa: string;

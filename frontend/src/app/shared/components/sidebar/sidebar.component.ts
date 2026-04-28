@@ -2,12 +2,13 @@ import { Component, input, output, computed } from '@angular/core';
 import { CurrentUser, ContactoResumo } from '../../../core/models/models';
 import { buildApiUrl } from '../../../core/config/api.config';
 
-type NavView = 'pipeline' | 'agenda' | 'dashboard';
+export type NavView = 'pipeline' | 'agenda' | 'dashboard' | 'utilizadores';
 
-const NAV_ITEMS: { id: NavView; label: string; icon: string }[] = [
+const NAV_ITEMS: { id: NavView; label: string; icon: string; adminOnly?: boolean }[] = [
   { id: 'pipeline',  label: 'Pipeline',  icon: '<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>' },
   { id: 'agenda',    label: 'Agenda',    icon: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
   { id: 'dashboard', label: 'Dashboard', icon: '<rect x="2" y="3" width="9" height="9" rx="1"/><rect x="13" y="3" width="9" height="9" rx="1"/><rect x="2" y="14" width="9" height="7" rx="1"/><rect x="13" y="14" width="9" height="7" rx="1"/>' },
+  { id: 'utilizadores', label: 'Utilizadores', adminOnly: true, icon: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' },
 ];
 
 @Component({
@@ -26,7 +27,7 @@ const NAV_ITEMS: { id: NavView; label: string; icon: string }[] = [
       </div>
 
       <nav class="sidebar-nav">
-        @for (item of navItems; track item.id) {
+        @for (item of visibleItems(); track item.id) {
           <button (click)="setView.emit(item.id)" [class.active]="view() === item.id" class="nav-item">
             <svg [innerHTML]="item.icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
                  [attr.stroke]="view() === item.id ? '#C8B800' : 'currentColor'"
@@ -84,7 +85,8 @@ export class SidebarComponent {
   readonly setView  = output<NavView>();
   readonly logout   = output<void>();
 
-  readonly navItems      = NAV_ITEMS;
+  readonly isAdmin       = computed(() => this.user()?.role === 'ADMIN');
+  readonly visibleItems  = computed(() => NAV_ITEMS.filter(i => !i.adminOnly || this.isAdmin()));
   readonly followUpCount = computed(() => this.contacts().filter(c => c.estado === 'FOLLOW_UP').length);
   readonly initial       = computed(() => this.user()?.nome?.[0]?.toUpperCase() ?? '?');
 

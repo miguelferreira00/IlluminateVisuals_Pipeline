@@ -6,5 +6,7 @@ public record UserResumoResponse(
         Long id,
         String nome,
         String email,
-        UserRole role
+        UserRole role,
+        String username,
+        Boolean ativo
 ) {}

@@ -9,6 +9,6 @@ public class UserMapper {
 
     public static UserResumoResponse toResumo(User user) {
         if (user == null) return null;
-        return new UserResumoResponse(user.getId(), user.getNome(), user.getEmail(), user.getRole());
+        return new UserResumoResponse(user.getId(), user.getNome(), user.getEmail(), user.getRole(), user.getUsername(), user.getAtivo());
     }
 }

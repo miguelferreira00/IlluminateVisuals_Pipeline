@@ -5,6 +5,7 @@ import { ShellComponent } from './features/shell/shell.component';
 import { PipelineComponent } from './features/pipeline/pipeline.component';
 import { AgendaComponent } from './features/agenda/agenda.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
+import { UtilizadoresComponent } from './features/utilizadores/utilizadores.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -13,9 +14,10 @@ export const routes: Routes = [
     component: ShellComponent,
     canActivate: [authGuard],
     children: [
-      { path: 'pipeline',  component: PipelineComponent },
-      { path: 'agenda',    component: AgendaComponent },
-      { path: 'dashboard', component: DashboardComponent },
+      { path: 'pipeline',      component: PipelineComponent },
+      { path: 'agenda',        component: AgendaComponent },
+      { path: 'dashboard',     component: DashboardComponent },
+      { path: 'utilizadores',  component: UtilizadoresComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ]
   },

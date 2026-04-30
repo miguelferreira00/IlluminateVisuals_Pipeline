@@ -99,7 +99,7 @@ public class GoogleCalendarService {
 
     // ── Google Calendar freebusy ───────────────────────────────────
 
-    private List<LocalDateTime> fetchGoogleBusySlots(User admin, LocalDate inicio, LocalDate fim, int duracaoMinutos) {
+    public List<LocalDateTime> fetchGoogleBusySlots(User admin, LocalDate inicio, LocalDate fim, int duracaoMinutos) {
         try {
             String accessToken = refreshAccessToken(admin.getGoogleCalendarToken());
             if (accessToken == null) return List.of();

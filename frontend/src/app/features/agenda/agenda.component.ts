@@ -1,11 +1,13 @@
 import { Component, OnInit, signal, computed, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { ContactoResumo, CurrentUser, Reuniao, ReuniaoRequest, SlotDisponivel } from '../../core/models/models';
 import { AgendaService } from '../../core/services/agenda.service';
 import { ReuniaoService } from '../../core/services/reuniao.service';
 import { ContactoService } from '../../core/services/contacto.service';
 import { UserService } from '../../core/services/user.service';
 import { DisponibilidadeService } from '../../core/services/disponibilidade.service';
+import { GoogleCalendarService, GoogleStatus } from '../../core/services/google-calendar.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { BookMeetingModalComponent, BookingSlot } from './book-meeting-modal/book-meeting-modal.component';
 
@@ -50,11 +52,25 @@ const HORAS = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30',
             <button (click)="next()" class="btn btn-ghost btn-sm" [disabled]="offset() >= maxOffset()">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
-            <!-- Admin: gerir disponibilidade -->
+            <!-- Admin: Google Calendar + disponibilidade manual -->
             @if (auth.isAdmin()) {
+              @if (googleStatus()?.configured) {
+                @if (googleStatus()?.connected) {
+                  <div style="display:flex;align-items:center;gap:6px;background:#F0FDF4;border:1px solid #A7F3D0;border-radius:7px;padding:5px 10px;font-size:12px;color:#047857;font-weight:600;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    Google Calendar ligado
+                    <button (click)="disconnectGoogle()" style="background:none;border:none;cursor:pointer;color:#6B6960;padding:0;margin-left:2px;font-size:11px;">✕</button>
+                  </div>
+                } @else {
+                  <button class="btn btn-ghost btn-sm" (click)="connectGoogle()" style="gap:5px;border-color:#E2E2DC;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                    Ligar Google Calendar
+                  </button>
+                }
+              }
               <button class="btn btn-ghost btn-sm" (click)="openDisponibilidade()" style="gap:5px;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                Disponibilidade
+                Disponibilidade manual
               </button>
             }
           </div>
@@ -244,6 +260,7 @@ export class AgendaComponent implements OnInit {
   dispIndisponivel    = signal<Set<string>>(new Set());
   dispLoading         = signal(false);
   allIndisponivel     = signal<Record<string, {id: number, nome: string}[]>>({});
+  googleStatus        = signal<GoogleStatus | null>(null);
 
   readonly unavailableForSlot = computed(() => {
     const slot = this.bookingSlot();
@@ -261,6 +278,8 @@ export class AgendaComponent implements OnInit {
     private contactoService: ContactoService,
     private userService: UserService,
     private dispService: DisponibilidadeService,
+    private googleCalendarService: GoogleCalendarService,
+    private route: ActivatedRoute,
     readonly auth: AuthService
   ) {}
 
@@ -270,6 +289,21 @@ export class AgendaComponent implements OnInit {
     this.reuniaoService.listar().subscribe({ next: r => this.reunioes.set(r), error: () => {} });
     this.contactoService.listar(undefined, undefined, undefined, 0, 200).subscribe({ next: p => this.contacts.set(p.content), error: () => {} });
     this.userService.admins().subscribe({ next: a => this.socios.set(a), error: () => {} });
+
+    if (this.auth.isAdmin()) {
+      this.googleCalendarService.status().subscribe({
+        next: s => this.googleStatus.set(s),
+        error: () => {}
+      });
+    }
+
+    // Após regresso do OAuth2 Google
+    this.route.queryParams.subscribe(params => {
+      if (params['google_connected'] === 'true') {
+        this.googleCalendarService.status().subscribe({ next: s => this.googleStatus.set(s), error: () => {} });
+        this.loadSlots();
+      }
+    });
   }
 
   loadSlots(): void {
@@ -461,6 +495,14 @@ export class AgendaComponent implements OnInit {
       const next = new Set(s);
       if (next.has(key)) next.delete(key); else next.add(key);
       return next;
+    });
+  }
+
+  connectGoogle(): void    { this.googleCalendarService.authorize(); }
+  disconnectGoogle(): void {
+    this.googleCalendarService.disconnect().subscribe(() => {
+      this.googleStatus.update(s => s ? { ...s, connected: false } : s);
+      this.loadSlots();
     });
   }
 

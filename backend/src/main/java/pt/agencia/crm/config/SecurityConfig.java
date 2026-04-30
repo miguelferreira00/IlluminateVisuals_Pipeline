@@ -32,6 +32,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Login e logout são públicos; /me exige sessão válida
                 .requestMatchers("/api/auth/login", "/api/auth/logout").permitAll()
+                .requestMatchers("/api/google/callback").permitAll()
                 // Gestão de utilizadores só para ADMIN (exceto /admins que é para todos autenticados)
                 .requestMatchers(HttpMethod.GET, "/api/users/admins").authenticated()
                 .requestMatchers("/api/users/**").hasRole("ADMIN")

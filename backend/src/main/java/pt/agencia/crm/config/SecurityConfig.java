@@ -36,8 +36,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/users/admins").authenticated()
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/disponibilidade/**").hasRole("ADMIN")
-                // Export e DELETE só para ADMIN
+                // Export só para ADMIN; contactos podem ser apagados por qualquer autenticado
                 .requestMatchers("/api/export/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/contactos/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")
                 // Tudo o resto exige autenticação
                 .requestMatchers("/api/**").authenticated()

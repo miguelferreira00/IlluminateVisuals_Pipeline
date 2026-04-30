@@ -8,6 +8,7 @@ import { ContactoService } from '../../core/services/contacto.service';
 import { UserService } from '../../core/services/user.service';
 import { DisponibilidadeService } from '../../core/services/disponibilidade.service';
 import { GoogleCalendarService, GoogleStatus } from '../../core/services/google-calendar.service';
+import { IcsCalendarService, IcsStatus } from '../../core/services/ics-calendar.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { BookMeetingModalComponent, BookingSlot } from './book-meeting-modal/book-meeting-modal.component';
 
@@ -68,6 +69,26 @@ const HORAS = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30',
                   </button>
                 }
               }
+              <!-- ICS Calendar -->
+              @if (icsStatus()?.connected) {
+                <div style="display:flex;align-items:center;gap:6px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:7px;padding:5px 10px;font-size:12px;color:#1D4ED8;font-weight:600;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  Calendário ICS ligado
+                  <button (click)="removeIcsUrl()" style="background:none;border:none;cursor:pointer;color:#6B6960;padding:0;margin-left:2px;font-size:11px;">✕</button>
+                </div>
+              } @else if (showIcsInput()) {
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <input type="text" [(ngModel)]="icsInputUrl" placeholder="webcal:// ou https://" style="width:220px;padding:5px 10px;font-size:12px;border:1.5px solid #E2E2DC;border-radius:6px;font-family:inherit;" />
+                  <button class="btn btn-primary btn-sm" (click)="saveIcsUrl()" [disabled]="!icsInputUrl">Guardar</button>
+                  <button class="btn btn-ghost btn-sm" (click)="showIcsInput.set(false)">✕</button>
+                </div>
+              } @else {
+                <button class="btn btn-ghost btn-sm" (click)="showIcsInput.set(true)" style="gap:5px;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  Ligar Calendário ICS
+                </button>
+              }
+
               <button class="btn btn-ghost btn-sm" (click)="openDisponibilidade()" style="gap:5px;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 Disponibilidade manual
@@ -261,6 +282,9 @@ export class AgendaComponent implements OnInit {
   dispLoading         = signal(false);
   allIndisponivel     = signal<Record<string, {id: number, nome: string}[]>>({});
   googleStatus        = signal<GoogleStatus | null>(null);
+  icsStatus           = signal<IcsStatus | null>(null);
+  showIcsInput        = signal(false);
+  icsInputUrl         = '';
 
   readonly unavailableForSlot = computed(() => {
     const slot = this.bookingSlot();
@@ -279,6 +303,7 @@ export class AgendaComponent implements OnInit {
     private userService: UserService,
     private dispService: DisponibilidadeService,
     private googleCalendarService: GoogleCalendarService,
+    private icsCalendarService: IcsCalendarService,
     private route: ActivatedRoute,
     readonly auth: AuthService
   ) {}
@@ -291,10 +316,8 @@ export class AgendaComponent implements OnInit {
     this.userService.admins().subscribe({ next: a => this.socios.set(a), error: () => {} });
 
     if (this.auth.isAdmin()) {
-      this.googleCalendarService.status().subscribe({
-        next: s => this.googleStatus.set(s),
-        error: () => {}
-      });
+      this.googleCalendarService.status().subscribe({ next: s => this.googleStatus.set(s), error: () => {} });
+      this.icsCalendarService.status().subscribe({ next: s => this.icsStatus.set(s), error: () => {} });
     }
 
     // Após regresso do OAuth2 Google
@@ -503,6 +526,26 @@ export class AgendaComponent implements OnInit {
     this.googleCalendarService.disconnect().subscribe(() => {
       this.googleStatus.update(s => s ? { ...s, connected: false } : s);
       this.loadSlots();
+    });
+  }
+
+  saveIcsUrl(): void {
+    const url = this.icsInputUrl.trim();
+    if (!url) return;
+    this.icsCalendarService.saveUrl(url).subscribe(() => {
+      this.icsStatus.set({ connected: true, url });
+      this.showIcsInput.set(false);
+      this.icsInputUrl = '';
+      this.loadSlots();
+      this.loadTodos();
+    });
+  }
+
+  removeIcsUrl(): void {
+    this.icsCalendarService.removeUrl().subscribe(() => {
+      this.icsStatus.set({ connected: false, url: '' });
+      this.loadSlots();
+      this.loadTodos();
     });
   }
 

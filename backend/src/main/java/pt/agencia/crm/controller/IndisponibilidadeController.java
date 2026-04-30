@@ -11,6 +11,7 @@ import pt.agencia.crm.repository.IndisponibilidadeRepository;
 import pt.agencia.crm.repository.UserRepository;
 import pt.agencia.crm.service.CurrentUserService;
 import pt.agencia.crm.service.GoogleCalendarService;
+import pt.agencia.crm.service.IcsCalendarService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,6 +26,7 @@ public class IndisponibilidadeController {
     private final UserRepository              userRepository;
     private final CurrentUserService          currentUserService;
     private final GoogleCalendarService       googleCalendarService;
+    private final IcsCalendarService          icsCalendarService;
 
     // Indisponibilidade de um admin específico (para o When2Meet do próprio admin)
     @GetMapping
@@ -56,26 +58,28 @@ public class IndisponibilidadeController {
                       .add(Map.of("id", i.getAdmin().getId(), "nome", i.getAdmin().getNome()));
             });
 
-        // 2. Google Calendar para cada admin ligado
+        // 2. Google Calendar + ICS para cada admin ligado
         userRepository.findByAtivoTrue().stream()
             .filter(u -> u.getRole() == UserRole.ADMIN)
-            .filter(u -> u.getGoogleCalendarToken() != null && !u.getGoogleCalendarToken().isBlank())
             .forEach(admin -> {
-                try {
-                    googleCalendarService.fetchGoogleBusySlots(admin, dataInicio, dataFim, 30)
-                        .forEach(slot -> {
-                            String key = slot.toString().substring(0, 16);
-                            List<Map<String, Object>> lista = result.computeIfAbsent(key, k -> new ArrayList<>());
-                            // Evitar duplicados (admin já pode estar no When2Meet para este slot)
-                            boolean jaExiste = lista.stream()
-                                .anyMatch(m -> Objects.equals(m.get("id"), admin.getId()));
-                            if (!jaExiste) {
-                                lista.add(Map.of("id", admin.getId(), "nome", admin.getNome()));
-                            }
-                        });
-                } catch (Exception e) {
-                    // falha silenciosa — Google Calendar indisponível para este admin
+                List<LocalDateTime> slots = new ArrayList<>();
+
+                if (admin.getGoogleCalendarToken() != null && !admin.getGoogleCalendarToken().isBlank()) {
+                    try { slots.addAll(googleCalendarService.fetchGoogleBusySlots(admin, dataInicio, dataFim, 30)); }
+                    catch (Exception e) { /* falha silenciosa */ }
                 }
+
+                if (admin.getIcsCalendarUrl() != null && !admin.getIcsCalendarUrl().isBlank()) {
+                    try { slots.addAll(icsCalendarService.fetchBusySlots(admin.getIcsCalendarUrl(), dataInicio, dataFim, 30)); }
+                    catch (Exception e) { /* falha silenciosa */ }
+                }
+
+                slots.forEach(slot -> {
+                    String key = slot.toString().substring(0, 16);
+                    List<Map<String, Object>> lista = result.computeIfAbsent(key, k -> new ArrayList<>());
+                    boolean jaExiste = lista.stream().anyMatch(m -> Objects.equals(m.get("id"), admin.getId()));
+                    if (!jaExiste) lista.add(Map.of("id", admin.getId(), "nome", admin.getNome()));
+                });
             });
 
         return result;

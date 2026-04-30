@@ -38,6 +38,9 @@ public class User {
     @Column(name = "google_calendar_token", columnDefinition = "TEXT")
     private String googleCalendarToken;
 
+    @Column(name = "ics_calendar_url", columnDefinition = "TEXT")
+    private String icsCalendarUrl;
+
     @Column(nullable = false)
     @Builder.Default
     private Boolean ativo = true;
